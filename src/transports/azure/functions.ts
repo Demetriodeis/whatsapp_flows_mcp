@@ -1,11 +1,12 @@
 import { app, type HttpRequest, type HttpResponseInit, type InvocationContext } from "@azure/functions";
 import { SERVER_NAME } from "../../mcp/serverInfo.js";
 import { JSON_RPC_INTERNAL_ERROR } from "../http/jsonRpcErrors.js";
-import { handleMcpRequest } from "../http/mcpHttpHandler.js";
+import { handleBotMcpRequest, handleMcpRequest } from "../http/mcpHttpHandler.js";
 
 /**
  * Azure Functions (modelo de programação v4).
- *   POST /api/mcp     -> servidor MCP (Streamable HTTP)
+ *   POST /api/mcp           -> servidor MCP (Streamable HTTP)
+ *   POST /api/mcp/b/{alias} -> servidor MCP com as credenciais do bot cadastrado (conectores do Claude)
  *   GET  /api/health  -> health check
  *
  * authLevel "function": exige a chave da função (?code=... ou header x-functions-key).
@@ -18,6 +19,14 @@ app.http("mcp", {
   handler: mcpFunction,
 });
 
+app.http("mcp-bot", {
+  route: "mcp/b/{alias}",
+  methods: ["POST", "GET", "DELETE"],
+  authLevel: "function",
+  handler: (request, context) =>
+    runMcp(context, async () => handleBotMcpRequest(await toWebRequest(request), request.params.alias ?? "")),
+});
+
 app.http("health", {
   route: "health",
   methods: ["GET"],
@@ -25,10 +34,16 @@ app.http("health", {
   handler: async () => ({ status: 200, jsonBody: { status: "ok", server: SERVER_NAME } }),
 });
 
-async function mcpFunction(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
+function mcpFunction(request: HttpRequest, context: InvocationContext): Promise<HttpResponseInit> {
+  return runMcp(context, async () => handleMcpRequest(await toWebRequest(request)));
+}
+
+async function runMcp(
+  context: InvocationContext,
+  handle: () => Promise<Response>
+): Promise<HttpResponseInit> {
   try {
-    const response = await handleMcpRequest(await toWebRequest(request));
-    return toAzureResponse(response);
+    return await toAzureResponse(await handle());
   } catch (error) {
     context.error("Erro no handler MCP", error);
     return {

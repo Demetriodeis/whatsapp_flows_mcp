@@ -33,16 +33,12 @@ export function resolveBotCredentials(
 ): BlipConfigOverrides | undefined {
   if (!isValidBotAlias(alias)) return undefined;
 
-  const prefix = botSettingPrefix(alias);
-  const apiKey = env[`${prefix}API_KEY`]?.trim();
-  const contractId = env[`${prefix}CONTRACT_ID`]?.trim();
-  const commandsUrl = env[`${prefix}COMMANDS_URL`]?.trim();
-  if (!apiKey || (!contractId && !commandsUrl)) return undefined;
+  const setting = (name: string) => env[`${botSettingPrefix(alias)}${name}`]?.trim() || undefined;
+  const apiKey = setting("API_KEY");
+  const contractId = setting("CONTRACT_ID");
+  const commandsUrl = setting("COMMANDS_URL");
+  if (!apiKey || !(contractId || commandsUrl)) return undefined;
 
-  return {
-    apiKey,
-    contractId: contractId || undefined,
-    commandsUrl: commandsUrl || undefined,
-    requireRequestCredentials: true,
-  };
+  // requireRequestCredentials: nunca completa com as credenciais fixas (BLIP_API_KEY etc.).
+  return { apiKey, contractId, commandsUrl, requireRequestCredentials: true };
 }

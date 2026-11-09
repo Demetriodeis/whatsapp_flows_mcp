@@ -92,8 +92,9 @@ Escolhemos **Azure Functions** em vez de Static Web Apps porque um servidor MCP 
 executar código a cada requisição; Static Web Apps serve apenas conteúdo estático.
 
 ```
-POST https://<app>.azurewebsites.net/api/mcp      (MCP)
-GET  https://<app>.azurewebsites.net/api/health   (health check)
+POST https://<app>.azurewebsites.net/api/mcp            (MCP)
+POST https://<app>.azurewebsites.net/api/mcp/b/{alias}  (MCP de um bot cadastrado: conectores do Claude)
+GET  https://<app>.azurewebsites.net/api/health         (health check)
 ```
 
 Segurança (camadas combináveis):
@@ -161,9 +162,35 @@ Claude Code:
 claude mcp add --transport http whatsapp-flows-blip "https://<app>.azurewebsites.net/api/mcp?code=<CHAVE_FUNCAO>" --header "Authorization: Bearer <MCP_AUTH_TOKEN>"
 ```
 
-Claude (web/desktop) > **Configurações > Conectores > Adicionar conector personalizado**: use a URL
-com `?code=<CHAVE_FUNCAO>`. Como conectores personalizados não enviam headers fixos, nesse caso deixe
-`MCP_AUTH_TOKEN` vazio e proteja com a chave da função.
+### Conector personalizado do Claude (web, desktop e celular)
+
+Conectores personalizados aceitam só uma URL, sem headers. Por isso há uma rota por **bot**,
+em que as credenciais da Blip ficam guardadas nas App Settings e a URL carrega apenas um alias:
+
+```
+POST https://<app>.azurewebsites.net/api/mcp/b/{alias}?code=<CHAVE_FUNCAO>&token=<MCP_AUTH_TOKEN>
+```
+
+1. **Cadastre o bot no Azure** (Function App > Variáveis de ambiente), trocando o alias por
+   MAIÚSCULAS e hífens por `_`. Ex.: alias `valuedesign`:
+
+   | Nome                               | Valor         |
+   | ---------------------------------- | ------------- |
+   | `BLIP_BOT_VALUEDESIGN_API_KEY`     | `Key xxxx`    |
+   | `BLIP_BOT_VALUEDESIGN_CONTRACT_ID` | `valuedesign` |
+
+   (`BLIP_BOT_<ALIAS>_COMMANDS_URL` substitui o contrato, se preferir a URL completa.) A chave pode
+   ser uma referência do Key Vault: `@Microsoft.KeyVault(SecretUri=...)`.
+
+2. **Monte a URL** com a chave da função (Funções > `mcp-bot` > Teclas de função, ou
+   Chaves de aplicativo > `default`). Se `MCP_AUTH_TOKEN` estiver definido, acrescente `&token=`.
+
+3. **No Claude:** Configurações > Conectores > **Adicionar conector personalizado**, cole a URL e
+   deixe as opções de OAuth em branco. Ative o conector na conversa pelo menu de ferramentas.
+
+Cada bot vira um conector (um alias por bot). A rota do bot nunca usa `BLIP_API_KEY`/`BLIP_CONTRACT_ID`;
+alias não cadastrado retorna 404. A chave da função e o token ficam na URL do conector, então trate
+essa URL como segredo; para revogar, gere outra chave da função e outro `MCP_AUTH_TOKEN`.
 
 ## Fluxo de trabalho recomendado
 

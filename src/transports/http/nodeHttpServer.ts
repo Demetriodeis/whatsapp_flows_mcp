@@ -2,13 +2,15 @@
 /**
  * Servidor HTTP local (sem Azure Functions Core Tools). Também serve para container/App Service.
  * Uso: PORT=3000 node dist/transports/http/nodeHttpServer.js  ->  POST http://localhost:3000/mcp
+ *      (ou POST http://localhost:3000/mcp/b/{alias} para um bot cadastrado em BLIP_BOT_<ALIAS>_*)
  */
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import { SERVER_NAME } from "../../mcp/serverInfo.js";
-import { handleMcpRequest } from "./mcpHttpHandler.js";
+import { handleBotMcpRequest, handleMcpRequest } from "./mcpHttpHandler.js";
 
 const DEFAULT_PORT = 3000;
 const MCP_PATH = "/mcp";
+const BOT_PATH = /^\/mcp\/b\/([^/]+)$/;
 const HEALTH_PATH = "/health";
 
 const port = Number(process.env.PORT ?? DEFAULT_PORT);
@@ -26,11 +28,15 @@ async function route(req: IncomingMessage, res: ServerResponse): Promise<void> {
     res.writeHead(200, { "Content-Type": "application/json" }).end('{"status":"ok"}');
     return;
   }
-  if (url.pathname !== MCP_PATH) {
+  const botAlias = BOT_PATH.exec(url.pathname)?.[1];
+  if (url.pathname !== MCP_PATH && !botAlias) {
     res.writeHead(404).end();
     return;
   }
-  const response = await handleMcpRequest(await toWebRequest(req, url));
+  const request = await toWebRequest(req, url);
+  const response = botAlias
+    ? await handleBotMcpRequest(request, decodeURIComponent(botAlias))
+    : await handleMcpRequest(request);
   await writeWebResponse(response, res);
 }
 
