@@ -19,7 +19,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm test
+      - run: npm run check
 
   deploy:
     needs: test
@@ -35,7 +35,7 @@ jobs:
           npm ci
           npm run build
           mkdir -p .deploy
-          cp -r dist examples host.json package.json package-lock.json .deploy/
+          cp -r dist docs examples host.json package.json package-lock.json .deploy/
           cd .deploy && npm ci --omit=dev
       - name: Deploy
         uses: Azure/functions-action@v1

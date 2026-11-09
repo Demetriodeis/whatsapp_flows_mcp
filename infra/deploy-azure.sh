@@ -34,7 +34,7 @@ echo ">> Build e pacote..."
 rm -rf .deploy && mkdir .deploy
 npm ci
 npm run build
-cp -r dist examples host.json package.json package-lock.json .deploy/
+cp -r dist docs examples host.json package.json package-lock.json .deploy/
 (cd .deploy && npm ci --omit=dev && zip -qr ../app.zip .)
 rm -rf .deploy
 

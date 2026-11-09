@@ -14,9 +14,29 @@
             "type": "Form",
             "name": "form_dados",
             "children": [
-              { "type": "TextInput", "name": "nome", "label": "Nome completo", "input-type": "text", "required": true, "min-chars": 2, "max-chars": 80 },
-              { "type": "TextInput", "name": "email", "label": "E-mail", "input-type": "email", "required": true },
-              { "type": "TextInput", "name": "telefone", "label": "Telefone", "input-type": "phone", "required": false },
+              {
+                "type": "TextInput",
+                "name": "nome",
+                "label": "Nome completo",
+                "input-type": "text",
+                "required": true,
+                "min-chars": 2,
+                "max-chars": 80
+              },
+              {
+                "type": "TextInput",
+                "name": "email",
+                "label": "E-mail",
+                "input-type": "email",
+                "required": true
+              },
+              {
+                "type": "TextInput",
+                "name": "telefone",
+                "label": "Telefone",
+                "input-type": "phone",
+                "required": false
+              },
               {
                 "type": "Dropdown",
                 "name": "interesse",
@@ -67,7 +87,12 @@
             "type": "Form",
             "name": "form_confirmacao",
             "children": [
-              { "type": "OptIn", "name": "aceite_contato", "label": "Aceito receber contato por WhatsApp", "required": true },
+              {
+                "type": "OptIn",
+                "name": "aceite_contato",
+                "label": "Aceito receber contato por WhatsApp",
+                "required": true
+              },
               {
                 "type": "Footer",
                 "label": "Enviar",

@@ -38,7 +38,13 @@
                   { "id": "resolucao", "title": "Resolução do problema" }
                 ]
               },
-              { "type": "TextArea", "name": "comentario", "label": "Comentários (opcional)", "required": false, "max-length": 500 },
+              {
+                "type": "TextArea",
+                "name": "comentario",
+                "label": "Comentários (opcional)",
+                "required": false,
+                "max-length": 500
+              },
               {
                 "type": "Footer",
                 "label": "Enviar avaliação",
