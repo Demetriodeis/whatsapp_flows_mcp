@@ -154,6 +154,12 @@ export BLIP_API_KEY="Key SUA_CHAVE" BLIP_CONTRACT_ID=seu-contrato MCP_AUTH_TOKEN
 Opção B — GitHub Actions: workflow manual `.github/workflows/deploy-azure-functions.yml`
 (configure o secret `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` e a variável `AZURE_FUNCTIONAPP_NAME`).
 
+Opção C — VS Code (extensão Azure Functions): abra a pasta do projeto, clique com o botão direito no
+Function App na aba Azure e escolha **Deploy to Function App**. As tasks em `.vscode/` fazem
+`npm install` → `clean` → `build` → `npm prune --omit=dev` antes do envio e `npm install` depois
+(para restaurar as dependências de desenvolvimento). Cadastre `BLIP_API_KEY`, `BLIP_CONTRACT_ID` e
+`MCP_AUTH_TOKEN` em **Application Settings** do Function App.
+
 ### Conectar clientes ao endpoint remoto
 
 Claude Code:
