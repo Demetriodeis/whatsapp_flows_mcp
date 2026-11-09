@@ -1,0 +1,49 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "npm install (functions)",
+      "type": "shell",
+      "command": "npm install",
+      "problemMatcher": []
+    },
+    {
+      "label": "npm clean (functions)",
+      "type": "shell",
+      "command": "npm run clean",
+      "dependsOn": "npm install (functions)",
+      "problemMatcher": []
+    },
+    {
+      "label": "npm build (functions)",
+      "type": "shell",
+      "command": "npm run build",
+      "dependsOn": "npm clean (functions)",
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "npm prune (functions)",
+      "type": "shell",
+      "command": "npm prune --omit=dev",
+      "dependsOn": "npm build (functions)",
+      "problemMatcher": []
+    },
+    {
+      "label": "npm watch (functions)",
+      "type": "shell",
+      "command": "npm run watch",
+      "dependsOn": "npm clean (functions)",
+      "isBackground": true,
+      "problemMatcher": "$tsc-watch",
+      "group": { "kind": "build", "isDefault": true }
+    },
+    {
+      "label": "func: host start",
+      "type": "func",
+      "command": "host start",
+      "dependsOn": "npm watch (functions)",
+      "isBackground": true,
+      "problemMatcher": "$func-node-watch"
+    }
+  ]
+}
