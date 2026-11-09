@@ -4,7 +4,7 @@
 
 ```json
 {
-  "version": "6.3",
+  "version": "7.3",
   "data_api_version": "3.0",        // apenas para flows com endpoint
   "routing_model": { "A": ["B"] },  // obrigatório se data_api_version existir
   "screens": [ ... ]

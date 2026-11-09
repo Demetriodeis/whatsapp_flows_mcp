@@ -5,6 +5,7 @@
 # Uso:
 #   export RG=rg-whatsapp-flows-mcp LOCATION=brazilsouth APP=wa-flows-mcp-<sufixo> STORAGE=waflowsmcp<sufixo>
 #   export BLIP_API_KEY="Key xxxx" BLIP_CONTRACT_ID="seu-contrato" MCP_AUTH_TOKEN="$(openssl rand -hex 32)"
+#   (modo multi-contrato: troque as credenciais Blip por BLIP_REQUIRE_REQUEST_CREDENTIALS=true)
 #   ./infra/deploy-azure.sh
 set -euo pipefail
 
@@ -25,6 +26,7 @@ SETTINGS=()
 [[ -n "${BLIP_API_KEY:-}" ]] && SETTINGS+=("BLIP_API_KEY=$BLIP_API_KEY")
 [[ -n "${BLIP_CONTRACT_ID:-}" ]] && SETTINGS+=("BLIP_CONTRACT_ID=$BLIP_CONTRACT_ID")
 [[ -n "${BLIP_COMMANDS_URL:-}" ]] && SETTINGS+=("BLIP_COMMANDS_URL=$BLIP_COMMANDS_URL")
+[[ -n "${BLIP_REQUIRE_REQUEST_CREDENTIALS:-}" ]] && SETTINGS+=("BLIP_REQUIRE_REQUEST_CREDENTIALS=$BLIP_REQUIRE_REQUEST_CREDENTIALS")
 [[ -n "${MCP_AUTH_TOKEN:-}" ]] && SETTINGS+=("MCP_AUTH_TOKEN=$MCP_AUTH_TOKEN")
 if (( ${#SETTINGS[@]} )); then
   az functionapp config appsettings set -g "$RG" -n "$APP" --settings "${SETTINGS[@]}" -o none

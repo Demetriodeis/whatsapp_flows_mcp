@@ -26,3 +26,15 @@ test("overrides por requisição têm prioridade sobre o ambiente", () => {
   );
   assert.equal(loadBlipConfig(env, { apiKey: "b" }).authorization, "Key b");
 });
+
+test("modo multi-contrato ignora o ambiente e exige credenciais da requisição", () => {
+  const env = { BLIP_API_KEY: "fixa", BLIP_CONTRACT_ID: "fixo" };
+  const strict = { requireRequestCredentials: true };
+  assert.throws(() => loadBlipConfig(env, strict), /X-Blip-Api-Key/);
+  assert.throws(() => loadBlipConfig(env, { ...strict, apiKey: "b" }), /X-Blip-Contract-Id/);
+  assert.throws(() => loadBlipConfig(env, { ...strict, contractId: "c" }), /X-Blip-Api-Key/);
+
+  const config = loadBlipConfig(env, { ...strict, apiKey: "b", contractId: "c" });
+  assert.equal(config.authorization, "Key b");
+  assert.equal(config.commandsUrl, "https://c.http.msging.net/commands");
+});

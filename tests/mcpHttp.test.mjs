@@ -84,3 +84,23 @@ test("MCP_AUTH_TOKEN protege o endpoint", async () => {
   });
   assert.equal(authorized.status, 200);
 });
+
+test("BLIP_REQUIRE_REQUEST_CREDENTIALS não usa as credenciais do ambiente", async () => {
+  const saved = { key: process.env.BLIP_API_KEY, contract: process.env.BLIP_CONTRACT_ID };
+  process.env.BLIP_API_KEY = "fixa";
+  process.env.BLIP_CONTRACT_ID = "fixo";
+  try {
+    const env = { BLIP_REQUIRE_REQUEST_CREDENTIALS: "true" };
+    const { json } = await callMcp(rpc(8, "tools/call", { name: "list_flows", arguments: {} }), { env });
+    assert.equal(json.result.isError, true);
+    assert.match(json.result.content[0].text, /X-Blip-Api-Key/);
+
+    const offline = await callMcp(rpc(9, "tools/list"), { env });
+    assert.equal(offline.status, 200, "tools offline continuam funcionando sem credenciais");
+  } finally {
+    if (saved.key === undefined) delete process.env.BLIP_API_KEY;
+    else process.env.BLIP_API_KEY = saved.key;
+    if (saved.contract === undefined) delete process.env.BLIP_CONTRACT_ID;
+    else process.env.BLIP_CONTRACT_ID = saved.contract;
+  }
+});

@@ -36,16 +36,18 @@ Baseado na collection Postman _"WA Flows no Blip"_ e no artigo do Blip Help
 Pegue as credenciais no portal da Blip: bot > **Configurações > Informações de conexão**
 (_Authorization_ e _URL para enviar comandos_).
 
-| Variável            | Obrigatória | Descrição                                                      |
-| ------------------- | ----------- | -------------------------------------------------------------- |
-| `BLIP_API_KEY`      | sim         | Header Authorization (`Key xxxx`; o prefixo `Key ` é opcional) |
-| `BLIP_CONTRACT_ID`  | *           | Contrato → `https://{id}.http.msging.net/commands`             |
-| `BLIP_COMMANDS_URL` | *           | URL completa de commands (sobrepõe `BLIP_CONTRACT_ID`)         |
-| `BLIP_FLOWS_TO`     | não         | Padrão `postmaster@wa.gw.msging.net`                           |
-| `BLIP_TIMEOUT_MS`   | não         | Padrão `60000`                                                 |
-| `MCP_AUTH_TOKEN`    | modo HTTP   | Exige `Authorization: Bearer <token>` no endpoint remoto       |
+| Variável                           | Obrigatória | Descrição                                                                                |
+| ---------------------------------- | ----------- | ---------------------------------------------------------------------------------------- |
+| `BLIP_API_KEY`                     | sim         | Header Authorization (`Key xxxx`; o prefixo `Key ` é opcional)                           |
+| `BLIP_CONTRACT_ID`                 | *           | Contrato → `https://{id}.http.msging.net/commands`                                       |
+| `BLIP_COMMANDS_URL`                | *           | URL completa de commands (sobrepõe `BLIP_CONTRACT_ID`)                                   |
+| `BLIP_FLOWS_TO`                    | não         | Padrão `postmaster@wa.gw.msging.net`                                                     |
+| `BLIP_TIMEOUT_MS`                  | não         | Padrão `60000`                                                                           |
+| `MCP_AUTH_TOKEN`                   | modo HTTP   | Exige `Authorization: Bearer <token>` no endpoint remoto                                 |
+| `BLIP_REQUIRE_REQUEST_CREDENTIALS` | não (HTTP)  | `true` = modo multi-contrato: ignora as credenciais acima e exige headers por requisição |
 
-\* Informe um dos dois.
+\* Informe um dos dois. No modo multi-contrato, `BLIP_API_KEY`, `BLIP_CONTRACT_ID` e
+`BLIP_COMMANDS_URL` não são necessários (e são ignorados).
 
 ## Uso local (stdio)
 
@@ -102,6 +104,25 @@ Segurança (camadas combináveis):
 - **Multi-bot (opcional):** os headers `X-Blip-Api-Key`, `X-Blip-Contract-Id` e
   `X-Blip-Commands-Url` sobrepõem as App Settings por requisição.
 
+### Modo multi-contrato (qualquer contrato da Blip)
+
+Para que um único endpoint atenda qualquer contrato/bot, defina
+`BLIP_REQUIRE_REQUEST_CREDENTIALS=true` e **não** configure `BLIP_API_KEY`/`BLIP_CONTRACT_ID`
+nas App Settings. Nesse modo:
+
+- as credenciais do ambiente são ignoradas, mesmo que existam (nada cai num contrato padrão);
+- tools que chamam a Blip exigem `X-Blip-Api-Key` **e** `X-Blip-Contract-Id` (ou `X-Blip-Commands-Url`);
+- tools offline (`validate_flow_json`, `get_flow_json_example`, resources e prompts) funcionam sem credenciais.
+
+A chave (`Key ...`) é de cada **bot**: cada bot é registrado como um servidor MCP com seus headers:
+
+```bash
+claude mcp add --transport http blip-meu-bot "https://<app>.azurewebsites.net/api/mcp?code=<CHAVE_FUNCAO>" --header "Authorization: Bearer <MCP_AUTH_TOKEN>" --header "X-Blip-Api-Key: Key <CHAVE_DO_BOT>" --header "X-Blip-Contract-Id: <contrato>"
+```
+
+Conectores personalizados do Claude (web/desktop) não enviam headers fixos, então não funcionam
+nesse modo.
+
 ### Rodar localmente
 
 Sem Azure Functions Core Tools:
@@ -124,6 +145,8 @@ Opção A — script (Azure CLI):
 ```bash
 export RG=rg-whatsapp-flows-mcp LOCATION=brazilsouth APP=wa-flows-mcp-123 STORAGE=waflowsmcp123
 export BLIP_API_KEY="Key SUA_CHAVE" BLIP_CONTRACT_ID=seu-contrato MCP_AUTH_TOKEN="$(openssl rand -hex 32)"
+# ou, para o modo multi-contrato (sem credenciais fixas):
+# export BLIP_REQUIRE_REQUEST_CREDENTIALS=true MCP_AUTH_TOKEN="$(openssl rand -hex 32)"
 ./infra/deploy-azure.sh
 ```
 

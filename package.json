@@ -16,7 +16,8 @@
   ],
   "scripts": {
     "build": "tsc",
-    "clean": "rm -rf dist",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "watch": "tsc -w",
     "start": "node dist/transports/stdio.js",
     "start:http": "node dist/transports/http/nodeHttpServer.js",
     "start:func": "npm run build && func start",
