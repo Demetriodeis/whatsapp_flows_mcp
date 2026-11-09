@@ -4,3 +4,7 @@ dist/
 *.log
 .DS_Store
 local.settings.json
+
+# Pacotes de entrega gerados localmente
+*.zip
+*.bundle
