@@ -1,0 +1,60 @@
+{
+  "version": "6.3",
+  "screens": [
+    {
+      "id": "NPS",
+      "title": "Pesquisa de satisfação",
+      "terminal": true,
+      "data": {},
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          {
+            "type": "Form",
+            "name": "form_nps",
+            "children": [
+              { "type": "TextHeading", "text": "Como foi seu atendimento?" },
+              {
+                "type": "RadioButtonsGroup",
+                "name": "nota",
+                "label": "De 0 a 10, quanto você nos recomendaria?",
+                "required": true,
+                "data-source": [
+                  { "id": "10", "title": "10 - Com certeza" },
+                  { "id": "9", "title": "9" },
+                  { "id": "8", "title": "8" },
+                  { "id": "7", "title": "7" },
+                  { "id": "6", "title": "6 ou menos" }
+                ]
+              },
+              {
+                "type": "CheckboxGroup",
+                "name": "destaques",
+                "label": "O que mais gostou?",
+                "required": false,
+                "data-source": [
+                  { "id": "rapidez", "title": "Rapidez" },
+                  { "id": "cordialidade", "title": "Cordialidade" },
+                  { "id": "resolucao", "title": "Resolução do problema" }
+                ]
+              },
+              { "type": "TextArea", "name": "comentario", "label": "Comentários (opcional)", "required": false, "max-length": 500 },
+              {
+                "type": "Footer",
+                "label": "Enviar avaliação",
+                "on-click-action": {
+                  "name": "complete",
+                  "payload": {
+                    "nota": "${form.nota}",
+                    "destaques": "${form.destaques}",
+                    "comentario": "${form.comentario}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

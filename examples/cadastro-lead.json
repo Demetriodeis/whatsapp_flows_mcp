@@ -1,0 +1,91 @@
+{
+  "version": "6.3",
+  "screens": [
+    {
+      "id": "DADOS_PESSOAIS",
+      "title": "Cadastro",
+      "data": {},
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextHeading", "text": "Fale com a gente" },
+          { "type": "TextBody", "text": "Preencha seus dados e um especialista entrará em contato." },
+          {
+            "type": "Form",
+            "name": "form_dados",
+            "children": [
+              { "type": "TextInput", "name": "nome", "label": "Nome completo", "input-type": "text", "required": true, "min-chars": 2, "max-chars": 80 },
+              { "type": "TextInput", "name": "email", "label": "E-mail", "input-type": "email", "required": true },
+              { "type": "TextInput", "name": "telefone", "label": "Telefone", "input-type": "phone", "required": false },
+              {
+                "type": "Dropdown",
+                "name": "interesse",
+                "label": "Assunto de interesse",
+                "required": true,
+                "data-source": [
+                  { "id": "produto", "title": "Conhecer o produto" },
+                  { "id": "precos", "title": "Preços e planos" },
+                  { "id": "suporte", "title": "Suporte" }
+                ]
+              },
+              {
+                "type": "Footer",
+                "label": "Continuar",
+                "on-click-action": {
+                  "name": "navigate",
+                  "next": { "type": "screen", "name": "CONFIRMACAO" },
+                  "payload": {
+                    "nome": "${form.nome}",
+                    "email": "${form.email}",
+                    "telefone": "${form.telefone}",
+                    "interesse": "${form.interesse}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "CONFIRMACAO",
+      "title": "Confirmação",
+      "terminal": true,
+      "data": {
+        "nome": { "type": "string", "__example__": "Maria Silva" },
+        "email": { "type": "string", "__example__": "maria@exemplo.com" },
+        "telefone": { "type": "string", "__example__": "11999999999" },
+        "interesse": { "type": "string", "__example__": "produto" }
+      },
+      "layout": {
+        "type": "SingleColumnLayout",
+        "children": [
+          { "type": "TextSubheading", "text": "Confira seus dados" },
+          { "type": "TextBody", "text": "`'Nome: ' ${data.nome}`" },
+          { "type": "TextBody", "text": "`'E-mail: ' ${data.email}`" },
+          {
+            "type": "Form",
+            "name": "form_confirmacao",
+            "children": [
+              { "type": "OptIn", "name": "aceite_contato", "label": "Aceito receber contato por WhatsApp", "required": true },
+              {
+                "type": "Footer",
+                "label": "Enviar",
+                "on-click-action": {
+                  "name": "complete",
+                  "payload": {
+                    "nome": "${data.nome}",
+                    "email": "${data.email}",
+                    "telefone": "${data.telefone}",
+                    "interesse": "${data.interesse}",
+                    "aceite_contato": "${form.aceite_contato}"
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

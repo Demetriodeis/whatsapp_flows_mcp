@@ -1,0 +1,46 @@
+# Deploy manual para Azure Functions.
+# Configure em Settings > Secrets and variables > Actions:
+#   - secret  AZURE_FUNCTIONAPP_PUBLISH_PROFILE  (Portal > Function App > Get publish profile)
+#   - variable AZURE_FUNCTIONAPP_NAME
+# As credenciais da Blip (BLIP_API_KEY, BLIP_CONTRACT_ID) e MCP_AUTH_TOKEN ficam nas
+# App Settings da Function App, nunca no repositório.
+name: Deploy Azure Functions
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Build
+        run: |
+          npm ci
+          npm run build
+          mkdir -p .deploy
+          cp -r dist examples host.json package.json package-lock.json .deploy/
+          cd .deploy && npm ci --omit=dev
+      - name: Deploy
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ vars.AZURE_FUNCTIONAPP_NAME }}
+          package: .deploy
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
+          sku: flexconsumption
